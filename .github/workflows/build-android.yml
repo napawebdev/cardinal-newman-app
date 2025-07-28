@@ -12,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
     
     - name: Setup Java
       uses: actions/setup-java@v4
@@ -23,18 +24,43 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.32.5'
+        flutter-version: '3.24.3'  # Use a more stable version
         channel: 'stable'
+        
+    - name: Flutter doctor
+      run: flutter doctor -v
         
     - name: Get dependencies
       run: flutter pub get
       
-    - name: Build APK
-      run: flutter build apk --release
+    - name: Accept Android licenses
+      run: yes | flutter doctor --android-licenses || true
       
-    - name: Upload APK
+    - name: Build APK (Debug first)
+      run: |
+        flutter build apk --debug --verbose
+        
+    - name: Build APK (Release)
+      run: |
+        flutter build apk --release --verbose --no-tree-shake-icons
+      
+    - name: List build outputs
+      run: |
+        find build -name "*.apk" -type f || true
+        ls -la build/app/outputs/flutter-apk/ || true
+      
+    - name: Upload Debug APK
       uses: actions/upload-artifact@v4
       with:
-        name: cardinal-newman-app
+        name: cardinal-newman-app-debug
+        path: build/app/outputs/flutter-apk/app-debug.apk
+        retention-days: 30
+        if-no-files-found: warn
+        
+    - name: Upload Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: cardinal-newman-app-release
         path: build/app/outputs/flutter-apk/app-release.apk
         retention-days: 30
+        if-no-files-found: warn

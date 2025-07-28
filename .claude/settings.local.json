@@ -12,7 +12,9 @@
       "Bash(powershell:*)",
       "Bash(git init:*)",
       "Bash(touch:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)"
     ],
     "deny": []
   }
